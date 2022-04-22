@@ -1,0 +1,293 @@
+import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { useMoralisFile, useMoralis } from "react-moralis";
+import { ethers } from "ethers";
+import { useForm } from "react-hook-form";
+
+import {
+  BaseLayout,
+  Box,
+  Row,
+  Col,
+  Button,
+  InputForm,
+  TextAreaFrom,
+  NFTCard,
+  Notification,
+  UploadForm,
+  ConnectWalletButton,
+  PrivateRoute,
+} from "components";
+
+// Contracts
+import NFTContract from "contracts/nft";
+import StableCoinContract from "contracts/stablecoin";
+import MarketplaceContract from "contracts/marketplace";
+
+// Helper
+import { displayWallet } from "utils/helper";
+import { useNewMintEvent, useStableCoinAllowance } from "utils/hooks/moralis";
+
+const ItemCreatePage = () => {
+  const { saveFile } = useMoralisFile();
+
+  const { save: createMintEvent } = useNewMintEvent();
+  const { isStableCoinAllowance, approve: approveStableCoin } =
+    useStableCoinAllowance(MarketplaceContract.address);
+
+  const { account, isAuthenticated, enableWeb3, isWeb3Enabled, isInitialized } =
+    useMoralis();
+
+  const {
+    control,
+    reset,
+    watch,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      name: null,
+      image: null,
+      description: null,
+    },
+  });
+
+  const { name, image } = watch();
+
+  const [isSubmitting, setSubmitting] = useState(false);
+  const [isStableCoinApproving, setStableCoinApproving] =
+    useState<boolean>(false);
+
+  const clearForm = useCallback(() => {
+    reset();
+  }, [reset]);
+
+  const onSubmit = async (data: any) => {
+    if (isAuthenticated) {
+      mint(data);
+    }
+  };
+
+  const requestApproveStableCoin = useCallback(() => {
+    setStableCoinApproving(true);
+    approveStableCoin()
+      .then(() => {
+        Notification("success", "Approved Successfully");
+      })
+      .finally(() => setStableCoinApproving(false));
+  }, [approveStableCoin]);
+
+  const widgetNameForm = useMemo(() => {
+    return (
+      <Box mt="16px">
+        <InputForm
+          label="Name"
+          name="name"
+          control={control}
+          disabled={isSubmitting}
+          rules={{ required: "This field is required" }}
+          errors={errors}
+          size="large"
+          maxLength={20}
+          placeholder="eg. This is limited (max 20 characters)"
+        />
+      </Box>
+    );
+  }, [control, errors, isSubmitting]);
+
+  const widgetDescriptionForm = useMemo(() => {
+    return (
+      <Box mt="16px">
+        <TextAreaFrom
+          label="Description"
+          name="description"
+          control={control}
+          disabled={isSubmitting}
+          rules={{ required: false }}
+          rows={4}
+          maxLength={150}
+          size="large"
+          placeholder="eg. This is Limited (max 150 characters)"
+        />
+      </Box>
+    );
+  }, [control, isSubmitting]);
+
+  const widgetUploadImageForm = useMemo(() => {
+    const onSuccess = (res: null) => {
+      setValue("image", res);
+    };
+
+    return (
+      <UploadForm
+        name="image"
+        label="Upload File"
+        control={control}
+        rules={{ required: "This field is required" }}
+        errors={errors}
+        setValue={setValue}
+        onSuccess={onSuccess}
+      />
+    );
+  }, [control, errors, setValue]);
+
+  const widgetPreviewCard = useMemo(() => {
+    return (
+      <NFTCard
+        dataSource={{
+          creator: displayWallet(account),
+          metadata: {
+            name: name ?? "Best Seller #001",
+            image: image,
+          },
+        }}
+      />
+    );
+  }, [account, image, name]);
+
+  const widgetActions = useMemo(() => {
+    if (!isAuthenticated) {
+      return (
+        <Box mt="16px" textAlign="right">
+          <ConnectWalletButton />
+        </Box>
+      );
+    }
+
+    if (!isStableCoinAllowance) {
+      return (
+        <Box display="flex" mt="16px">
+          <Button
+            type="primary"
+            ml="auto"
+            loading={isStableCoinApproving}
+            onClick={() => requestApproveStableCoin()}
+          >
+            Approve
+          </Button>
+        </Box>
+      );
+    }
+
+    return (
+      <Box display="flex" mt="16px">
+        <Button
+          type="primary"
+          ml="auto"
+          mr="16px"
+          fontWeight="bold"
+          htmlType="submit"
+          disabled={!name || !image}
+          loading={isSubmitting}
+        >
+          Create
+        </Button>
+        <Button
+          onClick={() => clearForm()}
+          disabled={isSubmitting}
+          fontWeight="bold"
+        >
+          Discard
+        </Button>
+      </Box>
+    );
+  }, [
+    clearForm,
+    image,
+    isStableCoinApproving,
+    isAuthenticated,
+    isStableCoinAllowance,
+    isSubmitting,
+    name,
+    requestApproveStableCoin,
+  ]);
+
+  const mint = async (data: { name: any; description: any }) => {
+    setSubmitting(true);
+
+    const object = {
+      name: data.name,
+      description: data.description,
+      image: image,
+    };
+
+    const metadata = await saveFile(
+      `${account}_items_${data.name}.json`,
+      { base64: btoa(JSON.stringify(object)) },
+      {
+        type: "base64",
+        saveIPFS: true,
+        onSuccess: (result) => console.log(result?.ipfs()),
+        onError: (error) => console.log(error),
+      }
+    );
+
+    const provider = await enableWeb3();
+    const signed = provider?.getSigner();
+    const contract = new ethers.Contract(
+      NFTContract.address,
+      NFTContract.abi,
+      signed
+    );
+
+    const NFTCounter = await contract.NFTcounter();
+    const tokenId = NFTCounter.toNumber() + 1;
+
+    const event = await createMintEvent(tokenId, account);
+
+    try {
+      const txn = await contract.mint(
+        StableCoinContract.address,
+        tokenId,
+        metadata?.ipfs(),
+        data.name
+      );
+
+      await txn.wait().then((res: any) => {
+        clearForm();
+        Notification("success", "Asset already minted");
+      });
+    } catch (ex) {
+      event.destroy();
+      Notification("error", (ex as any).data.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isWeb3Enabled) {
+      enableWeb3();
+    }
+  }, [enableWeb3, isWeb3Enabled]);
+
+  return (
+    <BaseLayout>
+      <BaseLayout.Content className="container">
+        <Box p="24px 128px">
+          <form id="crate-item" onSubmit={handleSubmit(onSubmit)}>
+            <Row gutter={[64, 64]}>
+              <Col span={8}>{widgetPreviewCard}</Col>
+              <Col span={16}>
+                {widgetUploadImageForm}
+                {widgetNameForm}
+                {widgetDescriptionForm}
+                {widgetActions}
+              </Col>
+            </Row>
+          </form>
+        </Box>
+      </BaseLayout.Content>
+    </BaseLayout>
+  );
+};
+
+const ItemCreatePageWrapper = () => {
+  return (
+    <PrivateRoute>
+      <ItemCreatePage />
+    </PrivateRoute>
+  );
+};
+
+export default ItemCreatePageWrapper;
