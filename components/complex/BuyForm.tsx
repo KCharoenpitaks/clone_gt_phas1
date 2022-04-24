@@ -40,41 +40,37 @@ const BuyForm = ({ tokenId, marketItem, currency, onBuy, owners }: any) => {
 
   const requestBuy = useCallback(
     async (tokenId: string, price: string) => {
-      const provider = await enableWeb3();
-      const signed = provider.getSigner();
-
-      const marketplaceContract = new ethers.Contract(
-        MarketplaceContract.address,
-        MarketplaceContract.abi,
-        signed
-      );
-
-      const txn = await marketplaceContract.createMarketSale(
-        StableCoinContract.address,
-        tokenId
-      );
-
-      setSubmit(true);
-
-      const event = createBuyEvent(tokenId, price, account);
-      await txn
-        .wait()
-        .then((res: any) => {
-          Notification("success", "Buy Successfully");
-          if (onBuy) {
-            onBuy(res);
-          }
-        })
-        .catch((ex: any) => {
-          (event as any).destroy();
-          Notification(
-            "error",
-            "Something went wrong !!! Please try again later."
-          );
-        })
-        .finally(() => {
-          setSubmit(false);
-        });
+      // const provider = await enableWeb3();
+      // const signed = provider.getSigner();
+      // const marketplaceContract = new ethers.Contract(
+      //   MarketplaceContract.address,
+      //   MarketplaceContract.abi,
+      //   signed
+      // );
+      // const txn = await marketplaceContract.createMarketSale(
+      //   StableCoinContract.address,
+      //   tokenId
+      // );
+      // setSubmit(true);
+      // const event = createBuyEvent(tokenId, price, account);
+      // await txn
+      //   .wait()
+      //   .then((res: any) => {
+      //     Notification("success", "Buy Successfully");
+      //     if (onBuy) {
+      //       onBuy(res);
+      //     }
+      //   })
+      //   .catch((ex: any) => {
+      //     (event as any).destroy();
+      //     Notification(
+      //       "error",
+      //       "Something went wrong !!! Please try again later."
+      //     );
+      //   })
+      //   .finally(() => {
+      //     setSubmit(false);
+      //   });
     },
     [account, createBuyEvent, enableWeb3, onBuy]
   );
