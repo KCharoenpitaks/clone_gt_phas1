@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, FC } from "react";
 import styled, { css } from "styled-components";
 import Image from "next/image";
 import { Card, Avatar, Box } from "../";
@@ -7,6 +7,7 @@ import Icon from "components/Icon";
 import { useMarketItem, useUserProfile } from "utils/hooks/moralis";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { GetAllTokenIdsTransformed } from "types/Moralis";
 
 interface CardWrapperProps {
   scaleOnHover?: boolean;
@@ -79,15 +80,18 @@ const ImgWrapper = styled.div`
 `;
 
 interface NFTCardProps {
-  dataSource: any;
+  dataSource: GetAllTokenIdsTransformed;
   scaleOnHover?: boolean;
 }
 
-const NFTCard = ({ dataSource, scaleOnHover }: NFTCardProps) => {
+const NFTCard: FC<NFTCardProps> = (props) => {
+  const { dataSource, scaleOnHover } = props;
   const router = useRouter();
   const { profile: creatorProfile } = useUserProfile(dataSource?.creator);
   const { marketItem } = useMarketItem();
 
+  console.log(dataSource);
+  console.log(dataSource.metadata);
   const handleOnClick = useCallback(() => {
     if (dataSource?.token_id) {
       router.push(`/items/${dataSource.token_id}`);
