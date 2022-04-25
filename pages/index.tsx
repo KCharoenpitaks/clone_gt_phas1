@@ -17,7 +17,7 @@ import {
   NFTCard,
 } from "components";
 import { Typography } from "antd";
-import Grid from "antd/lib/card/Grid";
+import { Grid } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -56,6 +56,8 @@ const MarketItemCardWrapper = styled(Box)`
 
 const HomePage = () => {
   const router = useRouter();
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
 
   const onClickHandler = useCallback(() => {
     router.push("/items");
@@ -144,7 +146,14 @@ const HomePage = () => {
       <BaseLayout.Content>
         <Box className="container">
           <Box display="flex" flexDirection="column" justifyContent="center">
-            <Box display="flex" justifyContent="space-between" padding="96px 0">
+            <Box
+              style={{
+                display: "flex",
+                justifyContent: !screens.xs ? "space-between" : "",
+                flexDirection: screens.xs ? "column" : "row",
+                padding: "96px 0",
+              }}
+            >
               <Box
                 display="flex"
                 flexDirection="column"
@@ -195,11 +204,14 @@ const HomePage = () => {
               and learning together."`}
             </Text>
             <Box mt="16px">
-              <Text width="fit-content">
-                <Link href="/items" style={{ color: "white" }}>
+              <Link href="/items" passHref>
+                <Text
+                  width="fit-content"
+                  style={{ color: "white", cursor: "pointer" }}
+                >
                   See more
-                </Link>
-              </Text>
+                </Text>
+              </Link>
             </Box>
           </Box>
         </Box>
@@ -208,7 +220,13 @@ const HomePage = () => {
             Top collections
           </Text>
           <Box mt="48px">
-            <Row gutter={[16, 80]}>
+            <Row
+              gutter={[16, 80]}
+              style={{
+                marginLeft: screens.xs ? 0 : -8,
+                marginRight: screens.xs ? 0 : -8,
+              }}
+            >
               {mockCollectionData
                 .filter((_, i) => i < 8)
                 .map((each, index) => {
