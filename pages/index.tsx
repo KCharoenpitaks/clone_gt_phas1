@@ -195,8 +195,10 @@ const HomePage = () => {
               and learning together."`}
             </Text>
             <Box mt="16px">
-              <Text width="fit-content" style={{ color: "white" }}>
-                <Link href="/items">See more</Link>
+              <Text width="fit-content">
+                <Link href="/items" style={{ color: "white" }}>
+                  See more
+                </Link>
               </Text>
             </Box>
           </Box>
@@ -218,7 +220,7 @@ const HomePage = () => {
                           <Image
                             alt={"collection_" + index}
                             src={src}
-                            width="70px"
+                            width="100px"
                             height="100px"
                           />
                         </Box>

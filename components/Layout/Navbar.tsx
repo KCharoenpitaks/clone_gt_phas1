@@ -134,11 +134,16 @@ const Navbar = () => {
             minWidth="200px"
             onClick={() => router.push(`/accounts/${account}`)}
           >
-            <Icon name="profile" width="24px" />
+            <Icon name="profile" style={{ fontSize: "24px" }} width="24px" />
             <Box ml="8px" fontSize="16px" fontWeight="bold">
               Profile
             </Box>
-            <Icon name="rightArrow" width="24px" ml="auto" />
+            <Icon
+              name="rightArrow"
+              style={{ fontSize: "24px" }}
+              width="24px"
+              ml="auto"
+            />
           </Box>
         </Menu.Item>
         <Menu.Item key="profile-setting">
@@ -148,20 +153,30 @@ const Navbar = () => {
             minWidth="200px"
             onClick={() => router.push("/settings/profile")}
           >
-            <Icon name="setting" width="24px" />
+            <Icon name="setting" width="24px" style={{ fontSize: "24px" }} />
             <Box ml="8px" fontSize="16px" fontWeight="bold">
               Setting
             </Box>
-            <Icon name="rightArrow" width="24px" ml="auto" />
+            <Icon
+              name="rightArrow"
+              width="24px"
+              ml="auto"
+              style={{ fontSize: "24px" }}
+            />
           </Box>
         </Menu.Item>
         <Menu.Item key="logout">
           <Box p="8px" display="flex" minWidth="200px" onClick={() => logout()}>
-            <Icon name="logout" width="24px" />
+            <Icon name="logout" width="24px" style={{ fontSize: "24px" }} />
             <Box ml="8px" fontSize="16px" fontWeight="bold">
               Logout
             </Box>
-            <Icon name="rightArrow" width="24px" ml="auto" />
+            <Icon
+              name="rightArrow"
+              width="24px"
+              ml="auto"
+              style={{ fontSize: "24px" }}
+            />
           </Box>
         </Menu.Item>
       </Menu>

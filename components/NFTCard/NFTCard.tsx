@@ -116,8 +116,8 @@ const NFTCard: FC<NFTCardProps> = (props) => {
                 borderTopLeftRadius: "20px",
                 borderTopRightRadius: "20px",
               }}
-              width="300px"
-              height="400px"
+              width={300}
+              height={300}
               src={dataSource?.metadata?.image}
             />
           </Box>

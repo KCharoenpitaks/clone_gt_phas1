@@ -34,11 +34,7 @@ const AccountDetailPage = () => {
 
     if (cover) {
       return (
-        <Image
-          src={profile?.cover}
-          alt="cover"
-          style={{ width: "100%", height: "225px" }}
-        />
+        <Image src={profile?.cover} alt="cover" width="100%" height="225px" />
       );
     }
 

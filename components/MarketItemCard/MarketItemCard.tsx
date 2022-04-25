@@ -73,7 +73,7 @@ const MarketItemCard = ({ dataSource, invertedColor }) => {
               objectFit: "cover",
             }}
             width="300px"
-            height="400px"
+            height="300px"
             src={dataSource?.metadata?.image}
           />
         </Box>

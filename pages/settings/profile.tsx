@@ -208,9 +208,9 @@ const SettingProfile = () => {
             <Image
               src={cover}
               alt="cover"
+              width="100px"
+              height="200px"
               style={{
-                width: "100%",
-                height: "200px",
                 borderRadius: "4px",
                 cursor: "pointer",
               }}
