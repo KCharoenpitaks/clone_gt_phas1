@@ -72,8 +72,8 @@ const MarketItemCard = ({ dataSource, invertedColor }) => {
               borderRadius: "6px",
               objectFit: "cover",
             }}
-            width="300px"
-            height="300px"
+            width="1000px"
+            height="1000px"
             src={dataSource?.metadata?.image}
           />
         </Box>

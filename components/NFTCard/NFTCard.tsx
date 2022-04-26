@@ -116,8 +116,8 @@ const NFTCard: FC<NFTCardProps> = (props) => {
                 borderTopLeftRadius: "20px",
                 borderTopRightRadius: "20px",
               }}
-              width={300}
-              height={300}
+              width={1000}
+              height={1000}
               src={dataSource?.metadata?.image}
             />
           </Box>
@@ -155,8 +155,16 @@ const NFTCard: FC<NFTCardProps> = (props) => {
           color="white"
         >
           <Box display="flex" alignItems="center">
-            <Box fontSize="18px" fontWeight="bold">
-              {`"${dataSource?.metadata?.name ?? "-"}"`}
+            <Box
+              fontSize="16px"
+              fontWeight="bold"
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {`${dataSource?.metadata?.name ?? "-"}`}
             </Box>
             <Box ml="auto">BSC</Box>
           </Box>

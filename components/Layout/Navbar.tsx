@@ -1,13 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import _ from "lodash";
 import styled, { css } from "styled-components";
 import { useMoralis } from "react-moralis";
-import { Button as AntButton, Button, Menu } from "antd";
+import { Button as AntButton, Button, Divider, Menu } from "antd";
 import { margin, MarginProps } from "styled-system";
 import Logo from "public/static/images/logo.png";
 import { Box, Avatar, ConnectWalletButton, Dropdown, Icon } from "components";
-import { stringToColor } from "utils/helper";
+import { displayWallet, stringToColor } from "utils/helper";
 import { getChainNameFromChainId } from "utils/provider";
 import { useAccountERC20Balance, useUserProfile } from "utils/hooks/moralis";
 import ChainBadge from "components/ChainBadge";
@@ -18,6 +18,7 @@ import { useRouter } from "next/router";
 import { Grid } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
 import CustomDrawer from "../CustomDrawer";
+import Text from "components/Text";
 
 const NavbarWrapper = styled.nav`
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
@@ -26,10 +27,12 @@ const NavbarWrapper = styled.nav`
   top: 0px;
   background-color: white;
   z-index: 10;
+  height: 64px;
 `;
 
 interface NavMenuButtonProps extends MarginProps {
   isSelected?: boolean;
+  isXs?: boolean;
 }
 
 const NavMenuButton = styled.div<NavMenuButtonProps>`
@@ -70,8 +73,16 @@ const NavMenuButton = styled.div<NavMenuButtonProps>`
         border-top-right-radius: 4px;
       }
     `;
+
+    const selectedCssXs = css`
+      background-color: #e8e8e8;
+    `;
+
     switch (props.isSelected) {
       case true:
+        if (props.isXs) {
+          return `${defaultCss}${selectedCssXs}`;
+        }
         return `${defaultCss}${selectedCss}`;
       default:
         return `${defaultCss}`;
@@ -92,6 +103,8 @@ const Navbar = () => {
   const { profile: userProfile } = useUserProfile(account);
 
   const [profileMenuOpen, setProfileMenuOpen] = useState<boolean>(false);
+  const [navigationDrawerOpen, setNavigationDrawerOpen] =
+    useState<boolean>(false);
 
   const widgetAccountMenu = useMemo(() => {
     const stableCoinBalance: any = _.find(balance, {
@@ -103,9 +116,40 @@ const Navbar = () => {
       : 0;
 
     return (
-      <Menu>
-        <Box p="4px 8px">
-          <Box border="1px solid #E1E8ED" p="8px" borderRadius="8px">
+      <Menu style={{ border: 0 }}>
+        {screens.xs && (
+          <Box
+            style={{
+              marginBottom: "16px",
+              display: "flex",
+              alignItems: "center",
+              padding: screens.xs ? "0px 16px" : "0px",
+            }}
+          >
+            <Avatar
+              src={userProfile?.avatar}
+              bg={stringToColor(account)}
+              style={{
+                marginRight: "8px",
+              }}
+              size={40}
+            />
+            <Box>
+              <Text fontSize="20px" fontWeight="bold">
+                {displayWallet(account)}
+              </Text>
+            </Box>
+          </Box>
+        )}
+        <Box style={{ padding: screens.xs ? "0px 16px" : "4px 8px" }}>
+          <Box
+            border="1px solid #E1E8ED"
+            borderRadius="8px"
+            style={{
+              padding: screens.xs ? "20px" : "16px",
+              lineHeight: "normal",
+            }}
+          >
             <Box display="flex" alignItems="center">
               <Box fontWeight="bold">Balance</Box>
               <ChainBadge chainId={chainId as string} />
@@ -113,11 +157,17 @@ const Navbar = () => {
             <Box>{_balance.toFixed(2)} USD</Box>
           </Box>
         </Box>
-        <Menu.Item key="profile">
+        <Menu.Item
+          key="profile"
+          style={{
+            padding: screens.xs ? "0px" : "16px",
+          }}
+        >
           <Box
-            p="8px"
             display="flex"
             minWidth="200px"
+            alignItems="center"
+            style={{ padding: screens.xs ? "0px 16px" : "0px" }}
             onClick={() => router.push(`/accounts/${account}`)}
           >
             <Icon name="profile" style={{ fontSize: "24px" }} width="24px" />
@@ -132,11 +182,18 @@ const Navbar = () => {
             />
           </Box>
         </Menu.Item>
-        <Menu.Item key="profile-setting">
+        <Divider style={{ margin: 0 }} />
+        <Menu.Item
+          key="profile-setting"
+          style={{
+            padding: screens.xs ? "0px" : "16px",
+          }}
+        >
           <Box
-            p="8px"
             display="flex"
             minWidth="200px"
+            alignItems="center"
+            style={{ padding: screens.xs ? "0px 16px" : "0px" }}
             onClick={() => router.push("/settings/profile")}
           >
             <Icon name="setting" width="24px" style={{ fontSize: "24px" }} />
@@ -151,8 +208,23 @@ const Navbar = () => {
             />
           </Box>
         </Menu.Item>
-        <Menu.Item key="logout">
-          <Box p="8px" display="flex" minWidth="200px" onClick={() => logout()}>
+        <Divider style={{ margin: 0 }} />
+        <Menu.Item
+          key="logout"
+          style={{
+            padding: screens.xs ? "0px" : "16px",
+          }}
+        >
+          <Box
+            display="flex"
+            minWidth="200px"
+            alignItems="center"
+            style={{ padding: screens.xs ? "0px 16px" : "0px" }}
+            onClick={() => {
+              logout();
+              setProfileMenuOpen(false);
+            }}
+          >
             <Icon name="logout" width="24px" style={{ fontSize: "24px" }} />
             <Box ml="8px" fontSize="16px" fontWeight="bold">
               Logout
@@ -167,7 +239,15 @@ const Navbar = () => {
         </Menu.Item>
       </Menu>
     );
-  }, [account, balance, chainId, logout, router]);
+  }, [
+    account,
+    balance,
+    chainId,
+    logout,
+    router,
+    screens.xs,
+    userProfile?.avatar,
+  ]);
 
   const widgetAccount = useMemo(() => {
     if (isAuthenticated) {
@@ -204,10 +284,76 @@ const Navbar = () => {
     widgetAccountMenu,
   ]);
 
+  const navigationMenu = useMemo(() => {
+    return (
+      <Fragment>
+        <NavMenuButton
+          isSelected={pathname === "/"}
+          isXs={screens.xs}
+          onClick={() => {
+            router.push("/");
+          }}
+        >
+          <Box display="flex">
+            <Text>Home</Text>
+            {screens.xs && (
+              <Icon
+                name="rightArrow"
+                width="24px"
+                ml="auto"
+                style={{ fontSize: "24px" }}
+              />
+            )}
+          </Box>
+        </NavMenuButton>
+        {screens.xs && <Divider style={{ margin: 0 }} />}
+        <NavMenuButton
+          isSelected={pathname === "/items"}
+          isXs={screens.xs}
+          onClick={() => router.push("/items")}
+        >
+          <Box display="flex">
+            <Text>Explore</Text>
+            {screens.xs && (
+              <Icon
+                name="rightArrow"
+                width="24px"
+                ml="auto"
+                style={{ fontSize: "24px" }}
+              />
+            )}
+          </Box>
+        </NavMenuButton>
+        {screens.xs && <Divider style={{ margin: 0 }} />}
+        <NavMenuButton
+          isSelected={
+            pathname === "/items/create" || pathname === "/connect-wallet"
+          }
+          isXs={screens.xs}
+          onClick={() => router.push("/items/create")}
+          mr={screens.xs ? "0px" : "16px"}
+        >
+          <Box display="flex">
+            <Text>Create</Text>
+            {screens.xs && (
+              <Icon
+                name="rightArrow"
+                width="24px"
+                ml="auto"
+                style={{ fontSize: "24px" }}
+              />
+            )}
+          </Box>
+        </NavMenuButton>
+      </Fragment>
+    );
+  }, [pathname, router, screens.xs]);
+
   return (
     <NavbarWrapper>
       <Box
         display="flex"
+        height="64px"
         padding="0px 16px"
         paddingRight={screens.xs ? "6px" : "16px"}
         margin="0px 16px"
@@ -229,33 +375,7 @@ const Navbar = () => {
           </Box>
         </Box>
         <Box ml="auto" display="flex" alignItems="center" height="100%">
-          {!screens.xs && (
-            <>
-              <NavMenuButton
-                isSelected={pathname === "/"}
-                onClick={() => {
-                  router.push("/");
-                }}
-              >
-                Home
-              </NavMenuButton>
-              <NavMenuButton
-                isSelected={pathname === "/items"}
-                onClick={() => router.push("/items")}
-              >
-                Explore
-              </NavMenuButton>
-              <NavMenuButton
-                isSelected={
-                  pathname === "/items/create" || pathname === "/connect-wallet"
-                }
-                onClick={() => router.push("/items/create")}
-                mr="16px"
-              >
-                Create
-              </NavMenuButton>
-            </>
-          )}
+          {!screens.xs && navigationMenu}
           {widgetAccount}
           {screens.xs && (
             <Button
@@ -267,6 +387,9 @@ const Navbar = () => {
                 marginLeft: "16px",
                 cursor: "pointer",
               }}
+              onClick={() => {
+                setNavigationDrawerOpen(true);
+              }}
             />
           )}
           {screens.xs && (
@@ -275,6 +398,14 @@ const Navbar = () => {
               handleOnClose={() => setProfileMenuOpen(false)}
             >
               {widgetAccountMenu}
+            </CustomDrawer>
+          )}
+          {screens.xs && (
+            <CustomDrawer
+              open={navigationDrawerOpen}
+              handleOnClose={() => setNavigationDrawerOpen(false)}
+            >
+              {navigationMenu}
             </CustomDrawer>
           )}
         </Box>

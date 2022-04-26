@@ -26,7 +26,6 @@ const CollectionCardWrapper = styled(Box)`
   padding: 16px;
 
   display: flex;
-  height: 110px;
 
   .ant-card-body {
     padding: 0px !important;
@@ -48,6 +47,7 @@ const CollectionCardWrapper = styled(Box)`
 
 const MarketItemCardWrapper = styled(Box)`
   background: black;
+  min-width: 350px;
   & > div {
     background: black;
     border: 0;
@@ -159,14 +159,15 @@ const HomePage = () => {
                 flexDirection="column"
                 justifyContent="center"
                 maxWidth="320px"
+                marginRight="8px"
               >
-                <Text fontSize="32px" fontWeight="bold" lineHeight="normal">
-                  GROW & NURTURE THAT IDEA YOU HAVE
+                <Text fontSize="34px" lineHeight="normal">
+                  GROW & NURTURE THAT <b>INNOVATIVE</b> IDEA <b>YOU</b> HAVE
                 </Text>
                 <Button
                   type="primary"
                   size="large"
-                  maxWidth="70%"
+                  maxWidth="224px"
                   mt="80px"
                   onClick={onClickHandler}
                 >
@@ -174,7 +175,7 @@ const HomePage = () => {
                 </Button>
               </Box>
               <MarketItemCardWrapper
-                width="320px"
+                marginTop={screens.xs ? "80px" : "0px"}
                 border="15px solid black"
                 borderRadius="6px"
               >
@@ -188,7 +189,7 @@ const HomePage = () => {
           backgroundColor="black"
           margin="0"
           width="100%"
-          padding="96px 24px"
+          padding="144px 24px"
           display="flex"
           flexDirection="row"
           justifyContent="center"
@@ -215,33 +216,40 @@ const HomePage = () => {
             </Box>
           </Box>
         </Box>
-        <Box className="container" padding="96px 0">
+        <Box
+          className="container"
+          padding={screens.md ? "96px 0px" : "96px 16px"}
+        >
           <Text fontWeight="bold" fontSize="32px">
             Top collections
           </Text>
           <Box mt="48px">
             <Row
-              gutter={[16, 80]}
+              gutter={screens.xs ? [16, 16] : [16, 80]}
               style={{
                 marginLeft: screens.xs ? 0 : -8,
                 marginRight: screens.xs ? 0 : -8,
               }}
             >
               {mockCollectionData
-                .filter((_, i) => i < 8)
+                .filter((_, i) => {
+                  if (screens.xl) return i < 8;
+                  if (screens.sm) return i < 6;
+                  if (screens.xs) return i < 4;
+                  return i < 8;
+                })
                 .map((each, index) => {
                   const { src, title, floorPrice } = each;
                   return (
                     <Col key={index} xs={24} sm={12} lg={8} xl={6}>
                       <CollectionCardWrapper onClick={onCollectionClickHandler}>
-                        <Box flex={1} alignSelf="center">
-                          <Image
-                            alt={"collection_" + index}
-                            src={src}
-                            width="100px"
-                            height="100px"
-                          />
-                        </Box>
+                        <Image
+                          alt={"collection_" + index}
+                          src={src}
+                          width="100px"
+                          height="100px"
+                        />
+
                         <Box
                           display="flex"
                           flexDirection="column"

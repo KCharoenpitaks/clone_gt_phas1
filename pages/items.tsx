@@ -11,6 +11,7 @@ import { getChainFromChainId } from "utils/provider";
 import { NFTCardSkeleton } from "components/NFTCard";
 import { GetStaticProps } from "next/types";
 import { GetAllTokenIdsRaw, GetAllTokenIdsTransformed } from "types/Moralis";
+import { Grid } from "antd";
 
 interface ItemListPageProps {
   marketData: GetAllTokenIdsTransformed[];
@@ -18,6 +19,8 @@ interface ItemListPageProps {
 const ItemListPage: FC<ItemListPageProps> = (props) => {
   const { marketData } = props;
   const ref = useRef();
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
 
   const [page, setPage] = useState(1);
 
@@ -34,10 +37,19 @@ const ItemListPage: FC<ItemListPageProps> = (props) => {
       </>
     );
   }, []);
+
+  const spanPerScreenSize = useMemo(() => {
+    if (screens.lg) return 6;
+    if (screens.md) return 8;
+    if (screens.sm) return 8;
+    if (screens.xs) return 12;
+    return 6;
+  }, [screens.lg, screens.md, screens.sm, screens.xs]);
+
   return (
     <BaseLayout>
       <BaseLayout.Content className="container">
-        <Box p="24px 40px">
+        <Box p={"24px 0px"}>
           {widgetPageTitle}
 
           <Row
@@ -55,7 +67,7 @@ const ItemListPage: FC<ItemListPageProps> = (props) => {
               // });
 
               return (
-                <Col span={6} key={data.token_id}>
+                <Col span={spanPerScreenSize} key={data.token_id}>
                   <NFTCard scaleOnHover dataSource={data} />
                 </Col>
               );
