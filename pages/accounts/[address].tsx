@@ -7,6 +7,7 @@ import { stringToColor } from "utils/helper";
 import AccountDetailCollectedTable from "components/complex/AccountDetailCollectedTable";
 import { useUserProfile } from "utils/hooks/moralis";
 import { useRouter } from "next/router";
+import { Divider, Grid } from "antd";
 
 const AvatarWrapper = styled.div`
   .ant-avatar {
@@ -16,6 +17,8 @@ const AvatarWrapper = styled.div`
 
 const AccountDetailPage = () => {
   const router = useRouter();
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
   const { address } = router.query;
   const { profile } = useUserProfile(address as string);
 
@@ -63,14 +66,10 @@ const AccountDetailPage = () => {
 
     return (
       <Box>
-        <Box
-          fontSize="18px"
-          fontWeight="bold"
-          pb="8px"
-          borderBottom="1px solid #E1E8ED"
-        >
+        <Box fontSize="16px" fontWeight={600} padding="16px 0px">
           Bio
         </Box>
+        <Divider style={{ margin: 0 }} />
         <Box mt="16px">{bio ?? "-"}</Box>
       </Box>
     );
@@ -83,8 +82,11 @@ const AccountDetailPage = () => {
         <Box className="container" style={{ position: "relative" }} pb="24px">
           {widgetAvatar}
           <Row mt="80px" gutter={64}>
-            <Col span={8}>{widgetUserBio}</Col>
-            <Col span={16}>
+            <Col span={screens.xs ? 24 : 8}>{widgetUserBio}</Col>
+            <Col
+              span={screens.xs ? 24 : 16}
+              style={{ paddingTop: screens.xs ? "16px" : "0px" }}
+            >
               <Box>{widgetAccountTabs}</Box>
             </Col>
           </Row>

@@ -58,7 +58,7 @@ const useProfileSetting = () => {
   };
 };
 
-const useUserProfile = (address: string | null) => {
+const useUserProfile = (address?: string | null) => {
   const { fetch } = useMoralisQuery("BscUserProfile", (query) =>
     query.equalTo("address", address)
   );

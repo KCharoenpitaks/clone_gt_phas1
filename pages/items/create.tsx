@@ -26,9 +26,14 @@ import MarketplaceContract from "contracts/marketplace";
 // Helper
 import { displayWallet } from "utils/helper";
 import { useNewMintEvent, useStableCoinAllowance } from "utils/hooks/moralis";
+import { Divider, Grid } from "antd";
+import { UploadFile } from "antd/lib/upload/interface";
 
 const ItemCreatePage = () => {
   const { saveFile } = useMoralisFile();
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
+  const [uploadedFile, setUploadedFile] = useState<UploadFile>();
 
   const { save: createMintEvent } = useNewMintEvent();
   const { isStableCoinAllowance, approve: approveStableCoin } =
@@ -46,9 +51,9 @@ const ItemCreatePage = () => {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      name: null,
-      image: null,
-      description: null,
+      name: "",
+      image: "",
+      description: "",
     },
   });
 
@@ -114,8 +119,17 @@ const ItemCreatePage = () => {
   }, [control, isSubmitting]);
 
   const widgetUploadImageForm = useMemo(() => {
-    const onSuccess = (res: null) => {
-      setValue("image", res);
+    const onSuccess = (imgUrl: string) => {
+      console.log("RES");
+      console.log(imgUrl);
+      setUploadedFile({
+        uid: "-1",
+        name: "xxx.png",
+        status: "done",
+        url: imgUrl,
+        thumbUrl: imgUrl,
+      });
+      setValue("image", imgUrl);
     };
 
     return (
@@ -127,20 +141,16 @@ const ItemCreatePage = () => {
         errors={errors}
         setValue={setValue}
         onSuccess={onSuccess}
+        fileList={uploadedFile && [uploadedFile]}
       />
     );
-  }, [control, errors, setValue]);
+  }, [control, errors, setValue, uploadedFile]);
 
   const widgetPreviewCard = useMemo(() => {
     return (
       <NFTCard
-        dataSource={{
-          creator: displayWallet(account),
-          metadata: {
-            name: name ?? "Best Seller #001",
-            image: image,
-          },
-        }}
+        creator={displayWallet(account)}
+        metadata={{ name: name ?? "Best Seller #001", image: image }}
       />
     );
   }, [account, image, name]);
@@ -261,14 +271,26 @@ const ItemCreatePage = () => {
     }
   }, [enableWeb3, isWeb3Enabled]);
 
+  const boxPadding = useMemo(() => {
+    if (screens.xl) return "24px 128px";
+    if (screens.lg) return "24px 12px";
+    if (screens.sm) return "24px 0px";
+    return "24px 0px";
+  }, [screens.lg, screens.sm, screens.xl]);
+
   return (
     <BaseLayout>
       <BaseLayout.Content className="container">
-        <Box p="24px 128px">
+        <Box p={boxPadding}>
           <form id="crate-item" onSubmit={handleSubmit(onSubmit)}>
-            <Row gutter={[64, 64]}>
-              <Col span={8}>{widgetPreviewCard}</Col>
-              <Col span={16}>
+            <Row gutter={[{ xs: 8, sm: 16, md: 24, lg: 48 }, 24]}>
+              <Col
+                span={screens.md ? 8 : 24}
+                style={{ textAlign: "-webkit-center" } as any}
+              >
+                <Box maxWidth={260}>{widgetPreviewCard}</Box>
+              </Col>
+              <Col span={screens.md ? 16 : 24}>
                 {widgetUploadImageForm}
                 {widgetNameForm}
                 {widgetDescriptionForm}

@@ -75,8 +75,9 @@ const UploadForm = ({
     return {
       ...defaultProps,
       ...customProps,
+      ...rest,
     };
-  }, [customProps, customRequest, onSuccess]);
+  }, [customProps, customRequest, onSuccess, rest]);
 
   return (
     <>

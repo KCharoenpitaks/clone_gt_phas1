@@ -65,10 +65,15 @@ const ItemListPage: FC<ItemListPageProps> = (props) => {
               //     data.creator = event.created_by;
               //   }
               // });
-
               return (
                 <Col span={spanPerScreenSize} key={data.token_id}>
-                  <NFTCard scaleOnHover dataSource={data} />
+                  <NFTCard
+                    clickable
+                    scaleOnHover
+                    creator={data.creator ?? ""}
+                    metadata={data.metadata}
+                    tokenId={data.token_id}
+                  />
                 </Col>
               );
             })}

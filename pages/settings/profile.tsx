@@ -19,7 +19,9 @@ import {
   Notification,
   Avatar,
 } from "components";
+import { convertLegacyProps } from "antd/lib/button/button";
 import { useProfileSetting } from "utils/hooks/moralis";
+import { Grid } from "antd";
 
 const UploadWrapper = styled.div`
   .ant-upload {
@@ -29,6 +31,8 @@ const UploadWrapper = styled.div`
 
 const SettingProfile = () => {
   const { profile, setProfile } = useProfileSetting();
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
 
   const { saveFile } = useMoralisFile();
 
@@ -116,20 +120,27 @@ const SettingProfile = () => {
     };
 
     return (
-      <Card>
+      <Card style={{ textAlign: "center" }}>
         {renderImage()}
         <UploadWrapper>
           <Upload {...props} style={{ width: "100%" }}>
-            <Button type="primary" shape="round" width="100%" mt="16px">
+            <Button
+              type="primary"
+              shape="round"
+              width="100%"
+              mt="16px"
+              maxWidth={240}
+            >
               Upload New Photo
             </Button>
           </Upload>
         </UploadWrapper>
         <Button
-          type="danger"
+          {...convertLegacyProps("danger")}
           shape="round"
           width="100%"
           mt="16px"
+          maxWidth={240}
           onClick={() => setValue("avatar", null)}
         >
           Delete
@@ -195,7 +206,7 @@ const SettingProfile = () => {
                 }}
               >
                 <Button
-                  type="danger"
+                  {...convertLegacyProps("danger")}
                   onClick={() => {
                     setValue("cover", null);
                     setCoverHovering(false);
@@ -208,8 +219,8 @@ const SettingProfile = () => {
             <Image
               src={cover}
               alt="cover"
-              width="100px"
-              height="200px"
+              width="500px"
+              height="500px"
               style={{
                 borderRadius: "4px",
                 cursor: "pointer",
@@ -279,14 +290,24 @@ const SettingProfile = () => {
     }
   }, [profile, reset]);
 
+  const span = useMemo(() => {
+    if (screens.md) return 8;
+    return 24;
+  }, [screens.md]);
+
+  const offset = useMemo(() => {
+    if (screens.md) return 2;
+    return 0;
+  }, [screens.md]);
+
   return (
     <BaseLayout>
       <BaseLayout.Content className={"container"}>
         <form id="update-profile-form" onSubmit={handleSubmit(onSubmit)}>
           <Box pt="48px" pb="24px">
             <Row gutter={[8, 8]}>
-              <Col span={6}>{widgetUploadAvatarImage}</Col>
-              <Col span={16} offset={2}>
+              <Col span={span}>{widgetUploadAvatarImage}</Col>
+              <Col span={span === 8 ? span + 4 : span} offset={offset}>
                 {widgetUploadCoverImage}
                 {widgetNameForm}
                 {widgetBioForm}

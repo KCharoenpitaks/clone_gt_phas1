@@ -5,7 +5,7 @@ import MarketplaceContract from "contracts/marketplace";
 import { ethers } from "ethers";
 import { hexValue } from "ethers/lib/utils";
 
-export const displayWallet = (wallet: string | null) => {
+export const displayWallet = (wallet?: string | null) => {
   if (wallet && wallet.length > 10) {
     const len = wallet.length;
     return wallet.substring(0, 6) + "..." + wallet.substring(len - 4, len);
@@ -14,7 +14,7 @@ export const displayWallet = (wallet: string | null) => {
   return "-";
 };
 
-export const stringToColor = function (str: string | null) {
+export const stringToColor = function (str?: string | null) {
   if (!str) {
     return "#5e5e5e";
   }

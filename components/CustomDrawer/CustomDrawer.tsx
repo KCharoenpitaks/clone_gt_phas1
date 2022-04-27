@@ -68,7 +68,7 @@ const CustomDrawer: FC<CustomDrawerProps> = (props) => {
           icon={<CloseOutlined />}
         />
       </Box>
-      <Divider style={{ margin: 0, marginBottom: "16px" }} />
+      <Divider style={{ margin: 0, marginBottom: 0 }} />
       {children}
     </Drawer>
   );

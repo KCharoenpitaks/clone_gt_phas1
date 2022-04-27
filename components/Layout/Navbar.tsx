@@ -32,7 +32,7 @@ const NavbarWrapper = styled.nav`
 
 interface NavMenuButtonProps extends MarginProps {
   isSelected?: boolean;
-  isXs?: boolean;
+  noBottomLine?: boolean;
 }
 
 const NavMenuButton = styled.div<NavMenuButtonProps>`
@@ -80,7 +80,7 @@ const NavMenuButton = styled.div<NavMenuButtonProps>`
 
     switch (props.isSelected) {
       case true:
-        if (props.isXs) {
+        if (props.noBottomLine) {
           return `${defaultCss}${selectedCssXs}`;
         }
         return `${defaultCss}${selectedCss}`;
@@ -120,7 +120,7 @@ const Navbar = () => {
         {screens.xs && (
           <Box
             style={{
-              marginBottom: "16px",
+              margin: "16px 0px",
               display: "flex",
               alignItems: "center",
               padding: screens.xs ? "0px 16px" : "0px",
@@ -157,19 +157,14 @@ const Navbar = () => {
             <Box>{_balance.toFixed(2)} USD</Box>
           </Box>
         </Box>
-        <Menu.Item
-          key="profile"
-          style={{
-            padding: screens.xs ? "0px" : "16px",
-          }}
+
+        <NavMenuButton
+          noBottomLine
+          isSelected={pathname === `/accounts/[address]`}
+          onClick={() => router.push(`/accounts/${account}`)}
+          style={{ padding: "0px 16px" }}
         >
-          <Box
-            display="flex"
-            minWidth="200px"
-            alignItems="center"
-            style={{ padding: screens.xs ? "0px 16px" : "0px" }}
-            onClick={() => router.push(`/accounts/${account}`)}
-          >
+          <Box display="flex" alignItems="center">
             <Icon name="profile" style={{ fontSize: "24px" }} width="24px" />
             <Box ml="8px" fontSize="16px" fontWeight="bold">
               Profile
@@ -181,21 +176,16 @@ const Navbar = () => {
               ml="auto"
             />
           </Box>
-        </Menu.Item>
+        </NavMenuButton>
         <Divider style={{ margin: 0 }} />
-        <Menu.Item
-          key="profile-setting"
-          style={{
-            padding: screens.xs ? "0px" : "16px",
-          }}
+
+        <NavMenuButton
+          noBottomLine
+          isSelected={pathname === "/settings/profile"}
+          onClick={() => router.push("/settings/profile")}
+          style={{ padding: "0px 16px" }}
         >
-          <Box
-            display="flex"
-            minWidth="200px"
-            alignItems="center"
-            style={{ padding: screens.xs ? "0px 16px" : "0px" }}
-            onClick={() => router.push("/settings/profile")}
-          >
+          <Box display="flex" alignItems="center">
             <Icon name="setting" width="24px" style={{ fontSize: "24px" }} />
             <Box ml="8px" fontSize="16px" fontWeight="bold">
               Setting
@@ -207,24 +197,17 @@ const Navbar = () => {
               style={{ fontSize: "24px" }}
             />
           </Box>
-        </Menu.Item>
+        </NavMenuButton>
         <Divider style={{ margin: 0 }} />
-        <Menu.Item
-          key="logout"
-          style={{
-            padding: screens.xs ? "0px" : "16px",
+        <NavMenuButton
+          noBottomLine
+          onClick={() => {
+            logout();
+            setProfileMenuOpen(false);
           }}
+          style={{ padding: "0px 16px" }}
         >
-          <Box
-            display="flex"
-            minWidth="200px"
-            alignItems="center"
-            style={{ padding: screens.xs ? "0px 16px" : "0px" }}
-            onClick={() => {
-              logout();
-              setProfileMenuOpen(false);
-            }}
-          >
+          <Box display="flex" alignItems="center">
             <Icon name="logout" width="24px" style={{ fontSize: "24px" }} />
             <Box ml="8px" fontSize="16px" fontWeight="bold">
               Logout
@@ -236,7 +219,7 @@ const Navbar = () => {
               style={{ fontSize: "24px" }}
             />
           </Box>
-        </Menu.Item>
+        </NavMenuButton>
       </Menu>
     );
   }, [
@@ -244,6 +227,7 @@ const Navbar = () => {
     balance,
     chainId,
     logout,
+    pathname,
     router,
     screens.xs,
     userProfile?.avatar,
@@ -289,7 +273,7 @@ const Navbar = () => {
       <Fragment>
         <NavMenuButton
           isSelected={pathname === "/"}
-          isXs={screens.xs}
+          noBottomLine={screens.xs}
           onClick={() => {
             router.push("/");
           }}
@@ -309,7 +293,7 @@ const Navbar = () => {
         {screens.xs && <Divider style={{ margin: 0 }} />}
         <NavMenuButton
           isSelected={pathname === "/items"}
-          isXs={screens.xs}
+          noBottomLine={screens.xs}
           onClick={() => router.push("/items")}
         >
           <Box display="flex">
@@ -329,7 +313,7 @@ const Navbar = () => {
           isSelected={
             pathname === "/items/create" || pathname === "/connect-wallet"
           }
-          isXs={screens.xs}
+          noBottomLine={screens.xs}
           onClick={() => router.push("/items/create")}
           mr={screens.xs ? "0px" : "16px"}
         >

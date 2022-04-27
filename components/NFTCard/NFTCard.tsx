@@ -80,26 +80,27 @@ const ImgWrapper = styled.div`
 `;
 
 interface NFTCardProps {
-  dataSource: GetAllTokenIdsTransformed;
+  clickable?: boolean;
+  creator: string;
+  metadata?: Record<string, any> | null;
+  tokenId?: string;
   scaleOnHover?: boolean;
 }
 
 const NFTCard: FC<NFTCardProps> = (props) => {
-  const { dataSource, scaleOnHover } = props;
+  const { creator, metadata, tokenId, scaleOnHover, clickable } = props;
   const router = useRouter();
-  const { profile: creatorProfile } = useUserProfile(dataSource?.creator);
+  const { profile: creatorProfile } = useUserProfile(creator);
   const { marketItem } = useMarketItem();
 
-  console.log(dataSource);
-  console.log(dataSource.metadata);
   const handleOnClick = useCallback(() => {
-    if (dataSource?.token_id) {
-      router.push(`/items/${dataSource.token_id}`);
+    if (tokenId) {
+      router.push(`/items/${tokenId}`);
     }
-  }, [dataSource.token_id, router]);
+  }, [router, tokenId]);
 
   const widgetImage = useMemo(() => {
-    if (dataSource?.metadata?.image) {
+    if (metadata?.image) {
       return (
         <ImgWrapper>
           <Box
@@ -118,7 +119,7 @@ const NFTCard: FC<NFTCardProps> = (props) => {
               }}
               width={1000}
               height={1000}
-              src={dataSource?.metadata?.image}
+              src={metadata?.image}
             />
           </Box>
         </ImgWrapper>
@@ -136,14 +137,14 @@ const NFTCard: FC<NFTCardProps> = (props) => {
         </Box>
       </ImgWrapper>
     );
-  }, [dataSource?.metadata?.image]);
+  }, [metadata?.image]);
 
   return (
     <CardWrapper
       bordered
-      hoverable
+      hoverable={clickable}
       scaleOnHover={scaleOnHover}
-      onClick={handleOnClick}
+      onClick={clickable ? handleOnClick : () => {}}
     >
       <Box>
         {widgetImage}
@@ -164,7 +165,7 @@ const NFTCard: FC<NFTCardProps> = (props) => {
                 textOverflow: "ellipsis",
               }}
             >
-              {`${dataSource?.metadata?.name ?? "-"}`}
+              {`${metadata?.name ?? "-"}`}
             </Box>
             <Box ml="auto">BSC</Box>
           </Box>
@@ -172,14 +173,16 @@ const NFTCard: FC<NFTCardProps> = (props) => {
             <Avatar
               size={35}
               src={creatorProfile?.avatar}
-              bg={stringToColor(dataSource?.creator)}
+              bg={stringToColor(creator)}
             />
             <Box ml="8px">
-              <Box fontSize="12px">Creator</Box>
+              <Box fontSize="12px" textAlign="left">
+                Creator
+              </Box>
               <Box fontSize="14px" fontWeight="bold">
                 {creatorProfile?.display_name
                   ? `@${creatorProfile?.display_name}`
-                  : displayWallet(dataSource?.creator)}
+                  : displayWallet(creator)}
               </Box>
             </Box>
             {marketItem?.price > 0 && (

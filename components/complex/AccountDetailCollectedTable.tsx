@@ -56,7 +56,13 @@ const CollectedTable = () => {
           });
           return (
             <Col span={8} key={(data as any).tokenId}>
-              <NFTCard dataSource={data} />
+              <NFTCard
+                clickable
+                scaleOnHover
+                creator={data.creator}
+                metadata={data.metadata}
+                tokenId={data.token_id}
+              />
             </Col>
           );
         })}
