@@ -10,7 +10,7 @@ import { useRouter } from "next/router";
 import { GetAllTokenIdsTransformed } from "types/Moralis";
 
 interface CardWrapperProps {
-  scaleOnHover?: boolean;
+  scaleonhover?: boolean;
 }
 
 const CardWrapper = styled(Card)<CardWrapperProps>`
@@ -36,7 +36,7 @@ const CardWrapper = styled(Card)<CardWrapperProps>`
       }
     `;
 
-    switch (props.scaleOnHover) {
+    switch (props.scaleonhover) {
       case true:
         return `${defaultCss}${hoverEffect}`;
       default:
@@ -143,7 +143,7 @@ const NFTCard: FC<NFTCardProps> = (props) => {
     <CardWrapper
       bordered
       hoverable={clickable}
-      scaleOnHover={scaleOnHover}
+      scaleonhover={scaleOnHover}
       onClick={clickable ? handleOnClick : () => {}}
     >
       <Box>

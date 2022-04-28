@@ -121,31 +121,31 @@ const useMarketItem = () => {
   };
 };
 
-const useTokenOwners = () => {
-  const Web3API = useMoralisWeb3Api();
+// const useTokenOwners = () => {
+//   const Web3API = useMoralisWeb3Api();
 
-  const [owners, setOwners] = useState([]);
+//   const [owners, setOwners] = useState([]);
 
-  const fetch = useCallback(
-    (tokenId: any, chainId: any) => {
-      const currentChainId = chainId ?? BSC_TESTNET_CHAIN_ID;
-      Web3API.token
-        .getTokenIdOwners({
-          chain: getChainFromChainId(parseInt(currentChainId, 16)) as any,
-          address: NFTContract.address,
-          token_id: tokenId,
-        })
-        .then((res) => res.result)
-        .then(setOwners as any);
-    },
-    [Web3API.token]
-  );
+//   const fetch = useCallback(
+//     (tokenId: any, chainId: any) => {
+//       const currentChainId = chainId ?? BSC_TESTNET_CHAIN_ID;
+//       Web3API.token
+//         .getTokenIdOwners({
+//           chain: getChainFromChainId(parseInt(currentChainId, 16)) as any,
+//           address: NFTContract.address,
+//           token_id: tokenId,
+//         })
+//         .then((res) => res.result)
+//         .then(setOwners as any);
+//     },
+//     [Web3API.token]
+//   );
 
-  return {
-    owners,
-    fetch,
-  };
-};
+//   return {
+//     owners,
+//     fetch,
+//   };
+// };
 
 const useStableCoinAllowance = (spenderContract: unknown) => {
   const { account, chainId, enableWeb3, isWeb3Enabled, isAuthenticated } =
@@ -371,6 +371,5 @@ export {
   useNewMintEvent,
   useMintEvent,
   useNewListingEvent,
-  useTokenOwners,
   useAccountERC20Balance,
 };

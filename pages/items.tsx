@@ -106,7 +106,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
   const chainId = 0x61; // bsc testnet
   const moralisSecret =
-    "7DHC9YW8lBI6i0i78Q2RBTXDrJFMdOIYGNksB5cCmXd6PCmFnu4D2qM7GJGvycF9";
+    "7DHC9YW8lBI6i0i78Q2RBTXDrJFMdOIYGNksB5cCmXd6PCmFnu4D2qM7GJGvycF9"; // TODO: USE ENV VARIABLE INSTEAD.
 
   await Moralis.start({ moralisSecret });
 
@@ -130,6 +130,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
       metadata: each.metadata ? JSON.parse(each.metadata) : null,
     };
   });
+  console.log(response);
 
   return {
     props: {

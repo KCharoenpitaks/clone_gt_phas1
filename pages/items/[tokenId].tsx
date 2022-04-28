@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMoralis, useMoralisWeb3Api } from "react-moralis";
 import { ethers } from "ethers";
@@ -32,64 +32,60 @@ import {
 
 import { getChainFromChainId } from "utils/provider";
 import { ListingTable, ListingForm, BuyForm } from "components/complex";
-import {
-  useMarketItem,
-  useNewBuyEvent,
-  useMintEvent,
-  useTokenOwners,
-} from "utils/hooks/moralis";
+import { useMarketItem, useMintEvent } from "utils/hooks/moralis";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import Link from "next/link";
+import { GetServerSideProps, GetStaticProps } from "next";
+import {
+  GetAllTokenIdsTransformed,
+  GetAllTokenIdsRaw,
+  GetTokenIdOwnersTransformed,
+  GetTokenIdOwnersRaw,
+  GetTokenIdMetadataTransformed,
+  GetTokenIdMetadataRaw,
+} from "types/Moralis";
+import { useMountEffect } from "utils/hooks/useMountEffect";
 
-const ItemDetailPage = () => {
+interface ItemDetailPageProps {
+  tokenOwnerData: GetTokenIdOwnersTransformed[];
+  tokenMetadata: GetTokenIdMetadataTransformed;
+}
+
+const ItemDetailPageWrapper: FC<ItemDetailPageProps> = (props) => {
+  const { tokenOwnerData, tokenMetadata } = props;
+  return (
+    <PublicRoute>
+      <ItemDetailPage
+        tokenOwnerData={tokenOwnerData}
+        tokenMetadata={tokenMetadata}
+      />
+    </PublicRoute>
+  );
+};
+
+const ItemDetailPage: FC<ItemDetailPageProps> = (props) => {
+  const { tokenOwnerData, tokenMetadata } = props;
   const router = useRouter();
   const { tokenId } = router.query;
 
   const { marketItem, fetch: fetchMarketItem } = useMarketItem();
-  const { owners, fetch: fetchTokenOwners } = useTokenOwners();
   const { event: mintEvent } = useMintEvent(tokenId as string);
 
-  const Web3API = useMoralisWeb3Api();
-  const { enableWeb3, user, chainId, account, isAuthenticated } = useMoralis();
+  const { chainId = 0x61, account, isAuthenticated } = useMoralis();
   const [dataSource, setDataSource] = useState([]);
 
-  // States
-  const [token, setToken] = useState<any>({});
-
-  const fetchItem = useCallback(async () => {
-    Web3API.token
-      .getTokenIdMetadata({
-        chain: getChainFromChainId(chainId && parseInt(chainId, 16)) as any,
-        address: NFTContract.address,
-        token_id: (tokenId as string) || "",
-      })
-      .then((res) => {
-        res.metadata = res.metadata && JSON.parse(res.metadata);
-        return res;
-      })
-      .then(setToken);
-  }, [Web3API.token, chainId, tokenId]);
-
-  useEffect(() => {
-    fetchItem();
-    fetchTokenOwners(tokenId, chainId);
+  useMountEffect(() => {
     fetchMarketItem(tokenId, chainId);
-  }, [chainId, fetchItem, fetchMarketItem, fetchTokenOwners, tokenId]);
+  });
 
-  const handleOnSale = useCallback(
-    (data: any) => {
-      fetchMarketItem(tokenId, chainId);
-    },
-    [chainId, fetchMarketItem, tokenId]
-  );
+  const handleOnSale = useCallback(() => {
+    fetchMarketItem(tokenId, chainId);
+  }, [chainId, fetchMarketItem, tokenId]);
 
-  const handleOnBuy = useCallback(
-    (data: any) => {
-      fetchMarketItem(tokenId, chainId);
-    },
-    [chainId, fetchMarketItem, tokenId]
-  );
+  const handleOnBuy = useCallback(() => {
+    fetchMarketItem(tokenId, chainId);
+  }, [chainId, fetchMarketItem, tokenId]);
 
   const widgetItemImage = useMemo(() => {
     return (
@@ -103,22 +99,22 @@ const ItemDetailPage = () => {
         p="16px"
       >
         <Image
-          src={token?.metadata?.image}
+          src={tokenMetadata?.metadata?.image}
           alt="nft"
-          width="300px"
-          height="400px"
+          width="1000px"
+          height="1000px"
           style={{ width: "100%", height: "auto" }}
         />
       </Box>
     );
-  }, [token?.metadata?.image]);
+  }, [tokenMetadata?.metadata?.image]);
 
   const widgetItemTitle = useMemo(() => {
     return (
       <>
-        <Box>{token?.metadata?.collection}</Box>
+        <Box>{tokenMetadata?.metadata?.collection}</Box>
         <Box fontSize="26px" fontWeight="bold">
-          {`"${token?.metadata?.name}"`}
+          {tokenMetadata?.metadata?.name}
         </Box>
         {mintEvent?.from_address && (
           <Box>
@@ -130,29 +126,11 @@ const ItemDetailPage = () => {
         )}
       </>
     );
-  }, [mintEvent, token?.metadata?.collection, token?.metadata?.name]);
-
-  const widgetOwnedBy = useMemo(() => {
-    return (
-      <Box
-        p="8px"
-        mt="8px"
-        display="flex"
-        alignItems="center"
-        bg="#F8F8F8"
-        borderRadius="4px !important"
-        border="1px solid #E1E8ED"
-      >
-        <Avatar size={40} bg={stringToColor(token?.owner_by)} />
-        <Box ml="8px">
-          <Box fontSize="10px">Owner By</Box>
-          <Box color="#000" fontWeight="bold" fontSize="12px">
-            {displayWallet(token?.owner_by)}
-          </Box>
-        </Box>
-      </Box>
-    );
-  }, [token?.owner_by]);
+  }, [
+    mintEvent.from_address,
+    tokenMetadata?.metadata?.collection,
+    tokenMetadata?.metadata?.name,
+  ]);
 
   const widgetDescription = useMemo(() => {
     return (
@@ -161,14 +139,14 @@ const ItemDetailPage = () => {
           Description
         </Box>
         <Box fontSize="12px" mt="8px">
-          {token?.metadata?.description ?? "-"}
+          {tokenMetadata?.metadata?.description ?? "-"}
         </Box>
       </Box>
     );
-  }, [token?.metadata?.description]);
+  }, [tokenMetadata?.metadata?.description]);
 
   const widgetListingForm = useMemo(() => {
-    const ownerAddresses = (owners as any[]).map((owner) => {
+    const ownerAddresses = tokenOwnerData.map((owner) => {
       return owner.owner_of.toLowerCase();
     });
 
@@ -177,7 +155,7 @@ const ItemDetailPage = () => {
     }
 
     return null;
-  }, [account, handleOnSale, isAuthenticated, owners, tokenId]);
+  }, [account, handleOnSale, isAuthenticated, tokenOwnerData, tokenId]);
 
   const widgetBuyForm = useMemo(() => {
     return (
@@ -185,11 +163,11 @@ const ItemDetailPage = () => {
         tokenId={tokenId}
         marketItem={marketItem}
         onBuy={handleOnBuy}
-        owners={owners}
+        owners={tokenOwnerData}
         currency="USD"
       />
     );
-  }, [handleOnBuy, marketItem, owners, tokenId]);
+  }, [handleOnBuy, marketItem, tokenId, tokenOwnerData]);
 
   return (
     <BaseLayout>
@@ -219,12 +197,62 @@ const ItemDetailPage = () => {
   );
 };
 
-const ItemDetailPageWrapper = () => {
-  return (
-    <PublicRoute>
-      <ItemDetailPage />
-    </PublicRoute>
-  );
-};
-
 export default ItemDetailPageWrapper;
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const Moralis = require("moralis/node");
+
+  const { params } = context;
+
+  const chainId = 0x61; // bsc testnet
+  const moralisSecret =
+    "7DHC9YW8lBI6i0i78Q2RBTXDrJFMdOIYGNksB5cCmXd6PCmFnu4D2qM7GJGvycF9"; // TODO: USE ENV VARIABLE INSTEAD.
+
+  await Moralis.start({ moralisSecret });
+
+  // Enable web3
+  await Moralis.enableWeb3({
+    chainId,
+  });
+
+  const getTokenIdOwnersOptions = {
+    address: NFTContract.address,
+    token_id: params?.tokenId,
+    chain: getChainFromChainId(chainId) as any,
+    limit: 100,
+    offset: 0,
+  };
+  const getTokenIdOwnersResponse = await Moralis.Web3API.token.getTokenIdOwners(
+    getTokenIdOwnersOptions
+  );
+  const getTokenIdOwnersResponseJSON: GetTokenIdOwnersTransformed[] = (
+    getTokenIdOwnersResponse.result as GetTokenIdOwnersRaw[]
+  ).map((each) => {
+    return {
+      ...each,
+      metadata: each.metadata ? JSON.parse(each.metadata) : null,
+    };
+  });
+
+  const getTokenIdMetadataOptions = {
+    address: NFTContract.address,
+    token_id: params?.tokenId,
+    chain: getChainFromChainId(chainId) as any,
+    limit: 100,
+    offset: 0,
+  };
+  const getTokenIdMetadataResponse =
+    await Moralis.Web3API.token.getTokenIdMetadata(getTokenIdMetadataOptions);
+
+  const getTokenIdMetadataResponseJSON: GetTokenIdMetadataTransformed = {
+    ...getTokenIdMetadataResponse,
+    metadata: JSON.parse(getTokenIdMetadataResponse.metadata),
+  };
+
+  return {
+    props: {
+      tokenOwnerData: getTokenIdOwnersResponseJSON || [],
+      tokenMetadata: getTokenIdMetadataResponseJSON,
+    },
+  };
+};
